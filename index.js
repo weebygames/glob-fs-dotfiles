@@ -10,24 +10,31 @@ module.exports = function (opts) {
       opts.dot = true;
     }
 
-    var isDotfile = file.isDotfile() && file.relative !== '.git';
-    var isDotdir = file.isDotdir() || file.relative === '.git';
+    var isDotfile = file.isDotfile();
+    var isDotdir = file.isDotdir();
+    var isDot = isDotdir || isDotfile;
+
+    if (!isDot) {
+      return file;
+    }
+
+    if (opts.dot === false && isDot) {
+      file.exclude = true;
+      return file;
+    }
 
     // dotfiles
-    if (isDotfile && (opts.dot === true || opts.dotfiles === true)) {
-      file.include = true;
+    if (isDotfile) {
+      file.include = opts.dot === true || opts.dotfiles === true;
       return file;
     }
 
     // dotdirs
-    if (isDotdir && (opts.dot === true || opts.dotdirs === true)) {
-      file.include = true;
+    if (isDotdir) {
+      file.include = opts.dot === true || opts.dotdirs === true;
       return file;
     }
 
-    if ((isDotdir || isDotfile) && file.include !== true) {
-      file.exclude = true;
-    }
     return file;
   };
 };

@@ -4,15 +4,16 @@
 var assert = require('assert');
 var Glob = require('glob-fs');
 var dotfiles = require('./');
-var glob;
 
-function has(files, fp) {
+var has = function(files, fp) {
   return files.indexOf(fp) !== -1;
-}
+};
 
 describe('dotfiles', function () {
+  var glob;
+
   beforeEach(function () {
-    glob = new Glob({gitignore: false});
+    glob = new Glob({ builtins: false });
 
     glob.on('include', function (file) {
       // console.log(file.relative);
@@ -24,7 +25,7 @@ describe('dotfiles', function () {
     });
   });
 
-  it('should glob dotfiles by default:', function (done) {
+  it('should not glob dotfiles by default:', function (done) {
     glob.use(dotfiles())
       .readdir('*', function (err, files) {
         assert.equal(has(files, 'LICENSE'), true);
@@ -36,7 +37,7 @@ describe('dotfiles', function () {
   });
 
   it('should use options passed to `glob`:', function (done) {
-    glob = new Glob({ dot: true })
+    glob = new Glob({ builtins: false, dot: true });
     glob.use(dotfiles())
       .readdir('*', function (err, files) {
         assert.equal(has(files, '.git'), true);
@@ -52,7 +53,7 @@ describe('dotfiles', function () {
         assert.equal(has(files, '.gitignore'), true);
 
         // reverse the test, ensure options are updated correctly
-        glob = new Glob()
+        glob = new Glob();
         glob.use(dotfiles({ dot: false, dotfiles: false }))
           .readdir('*', function (err, files) {
             assert.equal(has(files, '.git'), false);
@@ -63,7 +64,7 @@ describe('dotfiles', function () {
   });
 
   it('should glob dotfiles when `dotfiles` true is passed to glob:', function (done) {
-    glob = new Glob({ dotfiles: true })
+    glob = new Glob({ dotfiles: true });
     glob.use(dotfiles())
       .readdir('*', function (err, files) {
         // dotfiles => true
